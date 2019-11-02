@@ -4,6 +4,7 @@
   "private": true,
   "dependencies": {
     "react": "^16.11.0",
+    "react-autosuggest": "^9.4.3",
     "react-dom": "^16.11.0",
     "react-scripts-tailwindcss": "3.2.0-rc.1"
   },
@@ -27,5 +28,6 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
-  }
+  },
+  "devDependencies": {}
 }

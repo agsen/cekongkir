@@ -2,16 +2,20 @@ import React, { Component } from 'react';
 import '../styles/FormCek.css';
 import Autosuggest from 'react-autosuggest';
 import axios from 'axios';
-import {cities} from '../assets/Cities';
+import { isEmpty, capitalize } from 'lodash';
+import ReactLoading from "react-loading";
+import { cities } from '../assets/Cities';
 //
+import jneLogo from '../assets/jne.png'
+import posLogo from '../assets/pos.png'
+import tikiLogo from '../assets/tiki.png'
 
 const instanceAxios = axios.create({
     baseURL: 'https://api.rajaongkir.com/',
-    mode: 'no-cors',
     headers: {
         'key': 'a92bf940de73d54372d421393620c4da',
     }
-  });
+});
 
 const getSuggestions = value => {
     const inputValue = value.trim().toLowerCase();
@@ -33,14 +37,16 @@ const renderSuggestion = suggestion => (
 
 class FormCek extends Component {
     state = {
-        semuaKota:[],
+        semuaKota: [],
         kotaAsal: '',
-        objKotaAsal:{},
+        objKotaAsal: {},
         kotaTujuan: '',
-        objKotaTujuan:{},
+        objKotaTujuan: {},
         suggestionsKotaAsal: [],
         suggestionsKotaTujuan: [],
-        berat:1
+        berat: 1,
+        hasilOngkir: {},
+        kurir: 'jne'
     };
 
 
@@ -54,8 +60,12 @@ class FormCek extends Component {
             kotaTujuan: newValue
         });
     };
-    onChangeBerat=(event)=>{
-        this.setState({berat:event.target.value})
+    onChangeBerat = (event) => {
+        this.setState({ berat: event.target.value })
+    }
+
+    onChangeKurir = (kurir) => {
+        this.setState({ kurir: kurir })
     }
 
     onSuggestionsFetchRequestedKotaAsal = ({ value }) => {
@@ -82,91 +92,137 @@ class FormCek extends Component {
         });
     };
 
-    onSuggestionKotaAsalSelected=(event, { suggestion})=>{
+    onSuggestionKotaAsalSelected = (event, { suggestion }) => {
         this.setState({
-            objKotaAsal:suggestion
+            objKotaAsal: suggestion
         })
     }
 
-    onSuggestionKotaTujuanSelected=(event, { suggestion})=>{
+    onSuggestionKotaTujuanSelected = (event, { suggestion }) => {
         this.setState({
-            objKotaTujuan:suggestion
+            objKotaTujuan: suggestion
         })
     }
 
-    componentDidMount(){
+    componentDidMount() {
         instanceAxios.get('/starter/city')
-            .then(function (response) {console.log(response);
-        })
+            .then(function (response) {
+                console.log(response);
+            })
     }
 
-    cekOngkir=(idKotaAsal,idKotaTujuan,weight,courier)=>{
-        instanceAxios.post('/starter/city',{
+    cekOngkir = (idKotaAsal, idKotaTujuan, weight) => {
+        instanceAxios.post('/starter/cost', {
             origin: idKotaAsal,
             destination: idKotaTujuan,
             weight: weight,
-            courier: courier
-          })
-          .then(function (response) {
-            console.log(response);
-          })
+            courier: this.state.kurir
+        })
+            .then((response) => {
+                this.setState({
+                    hasilOngkir: response.data.rajaongkir
+                })
+            })
     }
 
     render() {
-        const { kotaAsal, kotaTujuan, suggestionsKotaAsal, suggestionsKotaTujuan, objKotaAsal, objKotaTujuan,berat } = this.state;
-        console.log(objKotaTujuan);
+        const { kotaAsal, kotaTujuan, suggestionsKotaAsal, suggestionsKotaTujuan,
+            objKotaAsal, objKotaTujuan, berat, hasilOngkir, kurir } = this.state;
+        console.log(hasilOngkir);
 
         return (
-            <div class="flex h-screen">
-            <div class="w-2/5 bg-blue-400"></div>
-            <div class="w-3/5 p-20">
-                <h1 class="text-5xl font-bold headline">Cek Ongkir</h1>
-                <p>Seluruh kota di Indonesia tanpa perlu input captcha </p>
-                <div class="mt-8">
-                    <p class="headline">Kota Asal</p>
-                    <Autosuggest
-                        suggestions={suggestionsKotaAsal}
-                        onSuggestionsFetchRequested={this.onSuggestionsFetchRequestedKotaAsal}
-                        onSuggestionsClearRequested={this.onSuggestionsClearRequestedKotaAsal}
-                        getSuggestionValue={getSuggestionValue}
-                        onSuggestionSelected={this.onSuggestionKotaAsalSelected}
-                        renderSuggestion={renderSuggestion}
-                        inputProps={{
-                            placeholder: 'Kota asal pengiriman',
-                            value: kotaAsal,
-                            onChange: this.onChangeKotaAsal
-                        }}
-                    />
-                </div>
-                <div class="mt-6">
-                    <p class="headline">Kota Tujuan</p>
-                    <Autosuggest
-                        suggestions={suggestionsKotaTujuan}
-                        onSuggestionsFetchRequested={this.onSuggestionsFetchRequestedKotaTujuan}
-                        onSuggestionsClearRequested={this.onSuggestionsClearRequestedKotaTujuan}
-                        getSuggestionValue={getSuggestionValue}
-                        renderSuggestion={renderSuggestion}
-                        onSuggestionSelected={this.onSuggestionKotaTujuanSelected}
-                        inputProps={{
-                            placeholder: 'Kota tujuan pengiriman',
-                            value: kotaTujuan,
-                            onChange: this.onChangeKotaTujuan
-                        }}
-                    />
-                </div>
-                <div class="mt-6">
-                    <p class="headline">Berat</p>
-                    <input class="w-8 bg-gray-200" type="text" name="berat" value={berat} onChange={this.onChangeBerat}/> kg
-                </div>
+            <div className="container">
+                <div className="container-pic"></div>
+                <div className="container-form">
+                    <h1 className="headline">Cek Ongkir</h1>
+                    <p className="subtitle">Seluruh kota di Indonesia tanpa perlu input captcha </p>
 
-                <button 
-                type="button" 
-                class="headline bg-blue-600 text-white w-1/4 mt-8 p-2 rounded-full"
-                onClick={()=>{
-                    this.cekOngkir(objKotaAsal.city_id,objKotaTujuan.city_id,berat*1000,"jne")
-                }}
-                >Cek Ongkir</button>
-            </div>
+                    <div className="container-suggest">
+                        <div className="form-item">
+                            <p className="label-form">Kota Asal</p>
+                            <Autosuggest
+                                suggestions={suggestionsKotaAsal}
+                                onSuggestionsFetchRequested={this.onSuggestionsFetchRequestedKotaAsal}
+                                onSuggestionsClearRequested={this.onSuggestionsClearRequestedKotaAsal}
+                                getSuggestionValue={getSuggestionValue}
+                                onSuggestionSelected={this.onSuggestionKotaAsalSelected}
+                                renderSuggestion={renderSuggestion}
+                                inputProps={{
+                                    placeholder: 'Kota asal pengiriman',
+                                    value: kotaAsal,
+                                    onChange: this.onChangeKotaAsal
+                                }}
+                            />
+                        </div>
+                        <div className="form-item">
+                            <p className="label-form">Kota Tujuan</p>
+                            <Autosuggest
+                                suggestions={suggestionsKotaTujuan}
+                                onSuggestionsFetchRequested={this.onSuggestionsFetchRequestedKotaTujuan}
+                                onSuggestionsClearRequested={this.onSuggestionsClearRequestedKotaTujuan}
+                                getSuggestionValue={getSuggestionValue}
+                                renderSuggestion={renderSuggestion}
+                                onSuggestionSelected={this.onSuggestionKotaTujuanSelected}
+                                inputProps={{
+                                    placeholder: 'Kota tujuan pengiriman',
+                                    value: kotaTujuan,
+                                    onChange: this.onChangeKotaTujuan
+                                }}
+                            />
+                        </div>
+                        <div className="form-item">
+                            <p className="label-form">Berat</p>
+                            <input className="" type="text" name="berat" value={berat} onChange={this.onChangeBerat} /> kg
+                        </div>
+                    </div>
+
+                    <div className="form-item">
+                        <p className="label-form">Kurir </p>
+                        <div className="container-kurir">
+                            <div
+                                onClick={() => { this.onChangeKurir("jne") }}
+                                className={kurir == "jne" && "kurir-active"}>
+                                <img src={jneLogo} />
+                            </div>
+                            <div
+                                onClick={() => { this.onChangeKurir("tiki") }}
+                                className={kurir == "tiki" && "kurir-active"}>
+                                <img src={tikiLogo} />
+                            </div>
+                            <div onClick={() => { this.onChangeKurir("pos") }}
+                                className={kurir == "pos" && "kurir-active"}>
+                                <img src={posLogo} />
+                            </div>
+                        </div>
+                    </div>
+
+                    <button
+                        className="btn form-item"
+                        onClick={() => {
+                            this.cekOngkir(objKotaAsal.city_id, objKotaTujuan.city_id, berat * 1000)
+                        }}
+                    >Cek Ongkir</button>
+
+                    {isEmpty(hasilOngkir) ?
+                        <div><ReactLoading /></div> :
+                        <div className="container-result">
+                            <h1 className="headline result">Ongkos Kirim {hasilOngkir.origin_details.city_name} ke {hasilOngkir.destination_details.city_name}</h1>
+                            <h2>Kurir : {hasilOngkir.results[0].name}</h2>
+                            <div className="container-item-service">
+                                {hasilOngkir.results[0].costs.map((item) => {
+                                    return (
+                                        <div className="item-service">
+                                            <h1>{item.service}</h1>
+                                            <p>{item.cost[0].value}</p>
+                                            <p>Estimasi {capitalize(item.cost[0].etd)} {item.cost[0].etd.search("hari") == -1 ? "hari" : ""}</p>
+                                        </div>
+                                    )
+                                })}
+                            </div>
+                        </div>
+                    }
+
+                </div>
             </div>)
     }
 

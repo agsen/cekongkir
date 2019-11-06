@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import '../styles/FormCek.css';
+import '../styles/autosuggest.css';
 import Autosuggest from 'react-autosuggest';
 import axios from 'axios';
 import { isEmpty, capitalize } from 'lodash';
@@ -148,7 +149,7 @@ class FormCek extends Component {
                                 onSuggestionSelected={this.onSuggestionKotaAsalSelected}
                                 renderSuggestion={renderSuggestion}
                                 inputProps={{
-                                    placeholder: 'Kota asal pengiriman',
+                                    placeholder: 'Asal pengiriman',
                                     value: kotaAsal,
                                     onChange: this.onChangeKotaAsal
                                 }}
@@ -164,7 +165,7 @@ class FormCek extends Component {
                                 renderSuggestion={renderSuggestion}
                                 onSuggestionSelected={this.onSuggestionKotaTujuanSelected}
                                 inputProps={{
-                                    placeholder: 'Kota tujuan pengiriman',
+                                    placeholder: 'Tujuan pengiriman',
                                     value: kotaTujuan,
                                     onChange: this.onChangeKotaTujuan
                                 }}
@@ -172,7 +173,7 @@ class FormCek extends Component {
                         </div>
                         <div className="form-item">
                             <p className="label-form">Berat</p>
-                            <input className="" type="text" name="berat" value={berat} onChange={this.onChangeBerat} /> kg
+                            <input className="input-berat" type="text" name="berat" value={berat} onChange={this.onChangeBerat} /> kg
                         </div>
                     </div>
 
@@ -198,6 +199,7 @@ class FormCek extends Component {
 
                     <button
                         className="btn form-item"
+                        disabled={kotaAsal == "" || kotaTujuan == ""}
                         onClick={() => {
                             this.cekOngkir(objKotaAsal.city_id, objKotaTujuan.city_id, berat * 1000)
                         }}
@@ -206,14 +208,14 @@ class FormCek extends Component {
                     {isEmpty(hasilOngkir) ?
                         <div><ReactLoading /></div> :
                         <div className="container-result">
-                            <h1 className="headline result">Ongkos Kirim {hasilOngkir.origin_details.city_name} ke {hasilOngkir.destination_details.city_name}</h1>
+                            {/* <h1 className="headline result">Ongkos Kirim {hasilOngkir.origin_details.city_name} ke {hasilOngkir.destination_details.city_name}</h1> */}
                             <h2>Kurir : {hasilOngkir.results[0].name}</h2>
                             <div className="container-item-service">
                                 {hasilOngkir.results[0].costs.map((item) => {
                                     return (
                                         <div className="item-service">
                                             <h1>{item.service}</h1>
-                                            <p>{item.cost[0].value}</p>
+                                            <p>Rp. {item.cost[0].value.toLocaleString()}</p>
                                             <p>Estimasi {capitalize(item.cost[0].etd)} {item.cost[0].etd.search("hari") == -1 ? "hari" : ""}</p>
                                         </div>
                                     )
@@ -223,7 +225,7 @@ class FormCek extends Component {
                     }
 
                 </div>
-            </div>)
+            </div >)
     }
 
 }

@@ -1,0 +1,27 @@
+.container {  }
+.react-autosuggest__input {  
+    padding: 8px;
+    border-radius: 8px;
+    margin-top: 4px;
+    margin-right: 4px;
+    background-color: rgba(100,149,237,0.1)
+}
+.react-autosuggest__input:focus {
+    outline: none;
+    border: 2px solid rgba(100,149,237,0.5);
+}
+
+.react-autosuggest__suggestions-list{ 
+    box-shadow: 0 4px 10px 0 rgba(0, 0, 0, 0.15);
+    margin-top: 4px;
+    padding: 8px;
+    position: fixed;
+    z-index: 1; 
+    background-color: white;
+    overflow: auto;
+    max-height: 400px;
+ }
+.suggestion {  }
+.react-autosuggest__suggestion--highlighted { 
+    background-color: rgba(100,149,237,0.1)
+ }

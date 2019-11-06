@@ -47,7 +47,9 @@ class FormCek extends Component {
         suggestionsKotaTujuan: [],
         berat: 1,
         hasilOngkir: {},
-        kurir: 'jne'
+        kurir: 'jne',
+        isLoadOngkir: false,
+        isErrorGetOngkir: false
     };
 
 
@@ -113,6 +115,7 @@ class FormCek extends Component {
     }
 
     cekOngkir = (idKotaAsal, idKotaTujuan, weight) => {
+        this.setState({ isLoadOngkir: true });
         instanceAxios.post('/starter/cost', {
             origin: idKotaAsal,
             destination: idKotaTujuan,
@@ -121,14 +124,23 @@ class FormCek extends Component {
         })
             .then((response) => {
                 this.setState({
-                    hasilOngkir: response.data.rajaongkir
+                    hasilOngkir: response.data.rajaongkir,
+                    isErrorGetOngkir: false
                 })
+            })
+            .catch(() => {
+                this.setState({
+                    isErrorGetOngkir: true
+                })
+            })
+            .finally(() => {
+                this.setState({ isLoadOngkir: false });
             })
     }
 
     render() {
         const { kotaAsal, kotaTujuan, suggestionsKotaAsal, suggestionsKotaTujuan,
-            objKotaAsal, objKotaTujuan, berat, hasilOngkir, kurir } = this.state;
+            objKotaAsal, objKotaTujuan, berat, hasilOngkir, kurir, isLoadOngkir, isErrorGetOngkir } = this.state;
         console.log(hasilOngkir);
 
         return (
@@ -205,21 +217,29 @@ class FormCek extends Component {
                         }}
                     >Cek Ongkir</button>
 
-                    {isEmpty(hasilOngkir) ?
-                        <div><ReactLoading /></div> :
-                        <div className="container-result">
-                            {/* <h1 className="headline result">Ongkos Kirim {hasilOngkir.origin_details.city_name} ke {hasilOngkir.destination_details.city_name}</h1> */}
-                            <h2>Kurir : {hasilOngkir.results[0].name}</h2>
-                            <div className="container-item-service">
-                                {hasilOngkir.results[0].costs.map((item) => {
-                                    return (
-                                        <div className="item-service">
-                                            <h1>{item.service}</h1>
-                                            <p>Rp. {item.cost[0].value.toLocaleString()}</p>
-                                            <p>Estimasi {capitalize(item.cost[0].etd)} {item.cost[0].etd.search("hari") == -1 ? "hari" : ""}</p>
-                                        </div>
-                                    )
-                                })}
+                    {isLoadOngkir && <span><ReactLoading type="bubbles" color="#6495ed" /> </span>}
+
+                    {isErrorGetOngkir &&
+                        <div>
+                            <br />
+                            <p>Gagal mengambil data ongkos kirim</p>
+                        </div>}
+                    {!isEmpty(hasilOngkir) &&
+                        <div>
+                            <div className="container-result">
+                                {/* <h1 className="headline result">Ongkos Kirim {hasilOngkir.origin_details.city_name} ke {hasilOngkir.destination_details.city_name}</h1> */}
+                                <h2>Kurir : {hasilOngkir.results[0].name}</h2>
+                                <div className="container-item-service">
+                                    {hasilOngkir.results[0].costs.map((item) => {
+                                        return (
+                                            <div className="item-service">
+                                                <h1>{item.service}</h1>
+                                                <p>Rp. {item.cost[0].value.toLocaleString()}</p>
+                                                <p>Estimasi {capitalize(item.cost[0].etd)} {item.cost[0].etd.search("hari") == -1 ? "hari" : ""}</p>
+                                            </div>
+                                        )
+                                    })}
+                                </div>
                             </div>
                         </div>
                     }

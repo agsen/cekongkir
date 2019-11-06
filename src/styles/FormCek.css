@@ -12,7 +12,7 @@ h1,p,h2{
 }
 
 .container-pic{
-    background-color: cornflowerblue;
+    background-image: url("../assets/delivery.png");
     width: 30%;
 }
 
@@ -23,6 +23,7 @@ h1,p,h2{
 }
 
 .container-form  .subtitle {
+    
 }
 
 .headline{
@@ -30,6 +31,7 @@ h1,p,h2{
     font-size: 36px;
     font-weight: 700;
     margin-top: 40px;
+    color: rgb(100,149,237);
 }
 
 .headline.result{
@@ -97,6 +99,7 @@ h1,p,h2{
     border: 2px dashed rgba(100,149,237,0.2);
     padding: 24px;
     margin-top: 20px;
+    display: inline-block;
 }
 
 .container-item-service{
